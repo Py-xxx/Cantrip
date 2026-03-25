@@ -16,9 +16,13 @@ export default function App() {
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const openingFired = useRef(false);
 
   // ── Connection check on mount, then kick off opening scene ───────────
   useEffect(() => {
+    if (openingFired.current) return;
+    openingFired.current = true;
+
     checkConnection()
       .then(() => {
         setConnecting(false);
