@@ -13,6 +13,7 @@ export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
+  isHidden?: boolean;       // sent to the AI but never shown in the chat (e.g. opening scene prompt)
   isRollResult?: boolean;   // roll result messages are role "user" but displayed differently
   skillCheck?: SkillCheck;  // present when the DM is waiting for a roll
   rollResult?: RollResult;  // filled in after the player rolls

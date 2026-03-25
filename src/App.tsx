@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { checkConnection, chat } from "./lib/ollama";
 import { SYSTEM_PROMPT, parseResponse } from "./lib/prompts";
+import { OPENING_SCENE } from "./data/campaign";
 import { Message } from "./components/Message";
 import type { ChatMessage, OllamaMessage, SkillCheck, RollResult } from "./lib/types";
 
@@ -16,15 +17,18 @@ export default function App() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // ── Connection check on mount ──────────────────────────────────────────
+  // ── Connection check on mount, then kick off opening scene ───────────
   useEffect(() => {
     checkConnection()
-      .then(() => setConnecting(false))
+      .then(() => {
+        setConnecting(false);
+        sendMessage(OPENING_SCENE, { hidden: true });
+      })
       .catch((err: Error) => {
         setConnecting(false);
         setConnectionError(err.message);
       });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Scroll to bottom on new messages ──────────────────────────────────
   useEffect(() => {
@@ -34,7 +38,7 @@ export default function App() {
   // ── Core send function ─────────────────────────────────────────────────
   async function sendMessage(
     content: string,
-    opts: { isRollResult?: boolean } = {}
+    opts: { isRollResult?: boolean; hidden?: boolean } = {}
   ) {
     setSendError(null);
 
@@ -43,6 +47,7 @@ export default function App() {
       role: "user",
       content,
       isRollResult: opts.isRollResult,
+      isHidden: opts.hidden,
     };
 
     const nextMessages = [...messages, userMessage];
@@ -162,14 +167,14 @@ export default function App() {
 
       {/* Chat log */}
       <main className="flex-1 overflow-y-auto px-6 py-6 max-w-3xl w-full mx-auto">
-        {messages.length === 0 && (
+        {messages.filter((m) => !m.isHidden).length === 0 && !generating && (
           <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
             <p className="text-stone-600 text-sm">Your adventure awaits.</p>
             <p className="text-stone-700 text-xs">Type anything to begin — describe your character, ask to start a campaign, or just say where you are.</p>
           </div>
         )}
 
-        {messages.map((msg) => (
+        {messages.filter((m) => !m.isHidden).map((msg) => (
           <Message
             key={msg.id}
             message={msg}
