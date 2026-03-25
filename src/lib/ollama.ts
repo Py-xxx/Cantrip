@@ -1,7 +1,7 @@
 import type { OllamaMessage } from "./types";
 
 const OLLAMA_URL = "http://localhost:11434";
-const MODEL = "dolphin-llama3.1:8b-v2.9.4-Q4_K_S";
+const MODEL = "CognitiveComputations/dolphin-llama3.1:8b-v2.9.4-Q4_K_S";
 
 export async function checkConnection(): Promise<void> {
   const response = await fetch(`${OLLAMA_URL}/api/tags`);
